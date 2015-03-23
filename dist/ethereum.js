@@ -700,7 +700,7 @@ var findIndex = function (array, callback) {
  * Should be called to get sting from it's hex representation
  *
  * @method toAscii
- * @param {String} string in hex
+ * @param {String} string in hex (ie '0x546869734973412054657374203837232b2a24255f2d3f')
  * @returns {String} ascii string representation of hex value
  */
 var toAscii = function (hex) {
@@ -711,6 +711,7 @@ var toAscii = function (hex) {
     if (hex.substring(0, 2) === '0x') {
         i = 2;
     }
+
     for (; i < l; i += 2) {
         var code = parseInt(hex.substr(i, 2), 16);
         if (code === 0) {
@@ -1053,7 +1054,7 @@ var isArray = function (object) {
  */
 var phantomjsFix = function () {
     if (!Function.prototype.bind) {
-        Function.prototype.bind = function (oThis) {                // jshint ignore:line
+        Function.prototype.bind = function (oThis) { // jshint ignore:line
             if (typeof this !== "function") {
                 // closest thing possible to the ECMAScript 5 internal IsCallable function
                 throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
@@ -1145,6 +1146,8 @@ var web3Methods = function () {
     }];
 };
 
+// PhantomJS doesn't support bind yet: https://github.com/ariya/phantomjs/issues/10522
+// See details in the description of the function
 utils.phantomjsFix();
 
 /// creates methods in a given object based on method description on input
@@ -1334,15 +1337,15 @@ var web3 = {
             // if its event, treat it differently
             if (fil._isEvent)
                 return fil(eventParams, options);
-
+            
             return filter(fil, ethWatch, formatters.outputLogFormatter);
         },
         // DEPRECATED
         watch: function (fil, eventParams, options) {
-                console.warn('eth.watch() is deprecated please use eth.filter() instead.');
-                return this.filter(fil, eventParams, options);
-            }
-            /*jshint maxparams:3 */
+            console.warn('eth.watch() is deprecated please use eth.filter() instead.');
+            return this.filter(fil, eventParams, options);
+        }
+        /*jshint maxparams:3 */
     },
 
     /// db object prototype
@@ -1754,7 +1757,7 @@ var methods = [
     { name: 'getStorage', call: 'eth_getStorage', addDefaultblock: 2},
     { name: 'getStorageAt', call: 'eth_getStorageAt', addDefaultblock: 3,
         inputFormatter: utils.toHex},
-    { name: 'getData', call: 'eth_getData', addDefaultblock: 2},
+    { name: 'getCode', call: 'eth_getCode', addDefaultblock: 2},
     { name: 'getBlock', call: blockCall,
         outputFormatter: formatters.outputBlockFormatter,
         inputFormatter: [utils.toHex, function(param){ return (!param) ? false : true; }]},
@@ -1789,7 +1792,7 @@ var methods = [
     { name: 'stateAt', call: 'eth_stateAt', newMethod: 'eth.getStorageAt' },
     { name: 'storageAt', call: 'eth_storageAt', newMethod: 'eth.getStorage' },
     { name: 'countAt', call: 'eth_countAt', newMethod: 'eth.getTransactionCount' },
-    { name: 'codeAt', call: 'eth_codeAt', newMethod: 'eth.getData' },
+    { name: 'codeAt', call: 'eth_codeAt', newMethod: 'eth.getCode' },
     { name: 'transact', call: 'eth_transact', newMethod: 'eth.sendTransaction' },
     { name: 'block', call: blockCall, newMethod: 'eth.getBlock' },
     { name: 'transaction', call: transactionFromBlockCall, newMethod: 'eth.getTransaction' },
